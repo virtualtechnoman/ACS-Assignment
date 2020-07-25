@@ -1,0 +1,254 @@
+<div class="container-fluid">
+  <div class="card">
+    <div class="card-header text-center font-weight-bold">All Departments
+      <button class="btn btn-primary btn-sm float-right" data-toggle="modal" data-target="#addDepartmentModal">Add
+        Department</button>
+    </div>
+    <div class="card-body">
+      <table class="table table-hover table-sm table-stripped">
+        <thead>
+          <tr>
+            <th scope="" class="text-center">S.No.</th>
+            <th scope="col">Name</th>
+            <th scope="col">Manager</th>
+            <th scope="col" class="text-center">Total Developers</th>
+            <th scope="col" class="text-center">Total Testes</th>
+            <th scope="col" class="text-center">Total Budget</th>
+            <th scope="col" class="text-center"></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let department of allDepartments; let i = index;">
+            <td class="text-center">{{i+1}}</td>
+            <td>{{department.name | titlecase}} </td>
+            <td>{{department.manager | titlecase}} </td>
+            <td class="text-center">{{totalArray[i].developers | number}} </td>
+            <td class="text-center">{{totalArray[i].testers | number}} </td>
+            <td class="text-center">{{totalArray[i].total | number}} </td>
+            <td>
+              <div class="btn-group" role="group" aria-label="Basic example">
+                <button type="button" class="btn btn-info" data-toggle="modal" data-target="#depratmentModal"
+                  (click)="viewDepartment(i)">View</button>
+                <button type="button" class="btn btn-danger" (click)="deleteDepartment(i)">Delete</button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<div class="modal  fade" id="addDepartmentModal" tabindex="-1" role="dialog" aria-labelledby="addDepartmentModalTitle"
+  aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="addDepartmentModalTitle">Add Department
+        </div>
+        <button class="btn btn-info float-right btn-sm" (click)="addManager()"
+          [disabled]="(f.subManagers) &&(this.managerArray.length >= this.allManagers.length)">Add Manager</button>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <form [formGroup]="departmentForm">
+          <div class="form-group row">
+            <label for="inputEmail3" class="col-sm-3 col-form-label">Department Name</label>
+            <div class="col-sm-9">
+              <input type="email" class="form-control" id="inputEmail3" placeholder="Enter Department Name"
+                formControlName="name" [ngClass]="{ 'is-invalid': submitted && f.name.errors }" />
+              <div *ngIf="submitted && f.name.errors" class="invalid-feedback">
+                <div *ngIf="f.name.errors.required">Name is required</div>
+              </div>
+            </div>
+          </div>
+          <div class="form-group row" *ngIf="f.manager">
+            <label for="inputEmail3" class="col-sm-3 col-form-label">Manager</label>
+            <div class="col-sm-4">
+              <select name="" class="form-control" id="" formControlName="manager"
+                [ngClass]="{ 'is-invalid': submitted && f.manager.errors }">
+                <option value="" selected disabled>Select a Manager</option>
+                <option *ngFor="let manager of allManagers; let i = index;" value="{{manager.name}}">{{i+1}}.
+                  {{manager.name | titlecase}}</option>
+              </select>
+              <div *ngIf="submitted && f.manager.errors" class="invalid-feedback">
+                <div *ngIf="f.manager.errors.required">Manager is required</div>
+              </div>
+            </div>
+            <div class="col-sm-1" *ngIf="f.developers">
+              <input type="text" class="form-control" id="" formControlName="developers"
+                [ngClass]="{ 'is-invalid': submitted && f.developers.errors }" placeholder="">
+              <div *ngIf="submitted && f.developers.errors" class="invalid-feedback">
+                <div *ngIf="f.developers.errors.required">developer is required</div>
+              </div>
+            </div>
+            <div class="col-sm-1" *ngIf="f.testers">
+              <input type="text" class="form-control" id="" formControlName="testers"
+                [ngClass]="{ 'is-invalid': submitted && f.testers.errors }" placeholder="">
+              <div *ngIf="submitted && f.testers.errors" class="invalid-feedback">
+                <div *ngIf="f.testers.errors.required">Manager is required</div>
+              </div>
+            </div>
+            <div class="col-sm-3">
+              <button class="btn btn-primary" (click)="addSubManager()" [disabled]="(f.manager.errors)">Add
+                SubManager</button>
+            </div>
+          </div>
+          <div *ngIf="managerArray" formArrayName="subManagers">
+            <div *ngFor="let manager of managerArray.controls; let i=index">
+              <div class="form-group row" [formGroupName]="i">
+                <label for="inputEmail3" class="col-sm-3 col-form-label">Manager</label>
+                <div class="col-sm-4">
+                  <select name="" class="form-control" id="" formControlName="manager"
+                    [ngClass]="{ 'is-invalid': submitted && manager.errors }">
+                    <option value="" selected disabled>Select a Manager</option>
+                    <option *ngFor="let manager of allManagers; let i = index;" value="{{manager.name}}">{{i+1}}.
+                      {{manager.name | titlecase}}</option>
+                  </select>
+                  <div *ngIf="submitted && manager.errors" class="invalid-feedback">
+                    <div *ngIf="manager.errors.required">Manager is required</div>
+                  </div>
+                </div>
+                <div class="col-sm-1">
+                  <input type="text" class="form-control" id="" formControlName="developers"
+                    [ngClass]="{ 'is-invalid': submitted && manager.errors }" placeholder="">
+                  <div *ngIf="submitted && manager.errors" class="invalid-feedback">
+                    <div *ngIf="manager.errors.required">developer is required</div>
+                  </div>
+                </div>
+                <div class="col-sm-1">
+                  <input type="text" class="form-control" id="" formControlName="testers"
+                    [ngClass]="{ 'is-invalid': submitted && manager.errors }" placeholder="">
+                  <div *ngIf="submitted && manager.errors" class="invalid-feedback">
+                    <div *ngIf="manager.errors.required">Manager is required</div>
+                  </div>
+                </div>
+                <div class="col-sm-3">
+                  <button class="btn btn-primary" (click)="addNestedSubManager(i)">Add Manager</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" (click)="onSubmit()">Save changes</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<div class="modal  fade" id="depratmentModal" tabindex="-1" role="dialog" aria-labelledby="depratmentModal"
+  aria-hidden="true">
+  <div class="modal-dialog modal-xl modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="card">
+        <div class="card-header text-center font-weight-bold">Department : {{ selectedDepartment?.name }}
+          <button class="btn btn-info btn-sm float-right">Add Manager</button>
+        </div>
+        <div class="card-body">
+          <div class="card">
+            <div class="card-header text-center font-weight-bold">Manager : {{selectedDepartment?.manager | titlecase}}
+              <button class="btn btn-info btn-sm float-right">Add Manager</button>
+              <button class="btn btn-info btn-sm float-right" (click)="addDeveloper(selectedDepartmentIndex,'')">Add
+                Dev</button>
+              <button class="btn btn-info btn-sm float-right" (click)="addTester(selectedDepartmentIndex,'')">Add
+                Test</button>
+            </div>
+            <div class="card-body">
+              <div class="row pb-1">
+                <div class="col-md-4">Total Developers : {{selectedDepartment?.developers | number}}</div>
+                <div class="col-md-4">Total Testers : {{selectedDepartment?.testers | number}}</div>
+                <div class="col-md-4">Total Budget :
+                  {{(selectedDepartment?.developers *1000) + (selectedDepartment?.testers*500) | number}}</div>
+              </div>
+              <div class="card" *ngIf="!(selectedDepartment?.subManagers.length)">
+                <table class="table table-sm table-stripped">
+                  <thead>
+                    <tr>
+                      <th scope="col">Employee Type</th>
+                      <th scope="col">Count</th>
+                      <th scope="col">Total Budget</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Developers</td>
+                      <td>{{selectedDepartment?.developers | number}}</td>
+                      <td>{{selectedDepartment?.developers * 1000}}</td>
+                    </tr>
+                    <tr>
+                      <td>Testers</td>
+                      <td>{{selectedDepartment?.testers | number}}</td>
+                      <td>{{selectedDepartment?.testers * 500}}</td>
+                    </tr>
+                  </tbody>
+                  <tfoot>
+                    <tr>
+                      <td colspan="2">TOTAL</td>
+                      <td>
+                        {{(selectedDepartment?.developers * 1000) + (selectedDepartment?.testers * 500) + 300 | number}}
+                      </td>
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+              <div class="card-columns" *ngIf="(selectedDepartment?.subManagers.length)">
+                  <div class="card "
+                    *ngFor="let department of selectedDepartment?.subManagers ; let i = index;">
+                    <div class="card-body">
+                      <h5 class="card-title">{{selectedDepartment?.subManagers[i].manager | titlecase}}
+                        <button class="btn btn-info btn-sm float-right">Manager+</button>
+                        <button class="btn btn-info btn-sm float-right"
+                          (click)="addDeveloper(selectedDepartmentIndex, i)">Dev+</button>
+                        <button class="btn btn-info btn-sm float-right"
+                          (click)="addTester(selectedDepartmentIndex,i)">Test +</button>
+                      </h5>
+                      <div class="card-text">
+                        <table class="table table-sm table-stripped">
+                          <thead>
+                            <tr>
+                              <th scope="col">Employee Type</th>
+                              <th scope="col">Count</th>
+                              <th scope="col">Total Budget</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>Developers</td>
+                              <td class="text-center">{{selectedDepartment?.subManagers[i].developers | number}}</td>
+                              <td class="text-center">{{selectedDepartment?.subManagers[i].developers * 1000}}</td>
+                            </tr>
+                            <tr>
+                              <td>Testers</td>
+                              <td class="text-center">{{selectedDepartment?.subManagers[i].testers | number}}</td>
+                              <td class="text-center">{{selectedDepartment?.subManagers[i].testers * 500}}</td>
+                            </tr>
+                          </tbody>
+                          <tfoot>
+                            <tr class="font-weight-bold">
+                              <td colspan="2">TOTAL</td>
+                              <td class="text-center">
+                                {{(selectedDepartment?.subManagers[i].developers * 1000) + (selectedDepartment?.subManagers[i].testers * 500) + (300) | number}}
+                              </td>
+                            </tr>
+                          </tfoot>
+                        </table>
+                      </div>
+                    </div>
+                  </div>
+              </div>
+            </div>
+            <div class="card-footer font-weight-bold">
+              Total : {{totalArray[selectedDepartmentIndex]?.total}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
