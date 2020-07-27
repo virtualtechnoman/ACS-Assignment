@@ -16,6 +16,11 @@ export class DepartmentComponent implements OnInit {
   allManagers: any[] = [];
   editing: boolean = false;
   departmentForm: FormGroup;
+  newManager = {
+    manager: '', developers: 0, testers: 0
+  }
+  newManagerIndex;
+  newManagerForm: FormGroup;
   submitted: boolean = false;
   selectedDepartment: any;
   selectedDepartmentIndex: number;
@@ -28,6 +33,7 @@ export class DepartmentComponent implements OnInit {
 
   ngOnInit() {
     this.initForm();
+    this.initNewManagerForm();
     this.geAllDepartments();
     this.getAllManagers();
   }
@@ -36,19 +42,25 @@ export class DepartmentComponent implements OnInit {
     return this.departmentForm.controls;
   }
 
+  get f2() {
+    return this.newManagerForm.controls;
+  }
+
   initForm() {
     this.departmentForm = this.formBuilder.group({
-      name: ['', Validators.required]
+      name: ['', Validators.required],
+      manager: ['', [Validators.required, Validators.minLength(0)]],
+      developers: [0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]],
+      testers: [0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]],
     })
   }
 
-  get managerArray() {
-    this.departmentForm.addControl('subManagers', new FormArray([
-      // new FormControl('manager', new FormControl('', Validators.required)),
-      // new FormControl('developers', new FormControl(0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')])),
-      // new FormControl('developers', new FormControl(0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')])),
-    ]));
-    return this.departmentForm.get('subManagers') as FormArray;
+  initNewManagerForm() {
+    this.newManagerForm = this.formBuilder.group({
+      manager: ['', [Validators.required, Validators.minLength(0)]],
+      developers: [0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]],
+      testers: [0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]],
+    })
   }
 
   viewDepartment(index) {
@@ -56,28 +68,17 @@ export class DepartmentComponent implements OnInit {
     this.selectedDepartment = this.allDepartments[index];
   }
 
-  addSubManager() {
-    console.log();
-    // if (this.managerArray.length < this.allManagers.length) {
-    // this.managerArray[i].subManagers = [];
-    console.log(this.departmentForm.value);
-    this.managerArray.push(this.formBuilder.group({
-      manager: ['', [Validators.required, Validators.minLength(0)]],
-      developers: [0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]],
-      testers: [0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]],
-    }));
-    console.log(this.departmentForm.value);
-    // }
-  }
 
   addDeveloper(departmentIndex, managerIndex) {
     console.log("Department Index : ", departmentIndex + " " + "Manager Index : ", managerIndex)
     if (managerIndex >= 0) {
       this.allDepartments[departmentIndex].subManagers[managerIndex].developers++;
+      this.toaserSerivce.success('Developer Added under' + this.allDepartments[departmentIndex].subManagers[managerIndex].manager, 'Success!');
       localStorage.setItem('department', JSON.stringify(this.allDepartments));
       this.geAllDepartments();
     } else {
       this.allDepartments[departmentIndex].developers++;
+      this.toaserSerivce.success('Developer Added under' + this.allDepartments[departmentIndex].manager, 'Success!');
       localStorage.setItem('department', JSON.stringify(this.allDepartments));
       this.geAllDepartments();
     }
@@ -87,32 +88,16 @@ export class DepartmentComponent implements OnInit {
   addTester(departmentIndex, managerIndex) {
     if (managerIndex >= 0) {
       this.allDepartments[departmentIndex].subManagers[managerIndex].testers++;
+      this.toaserSerivce.success('Tester Added under' + this.allDepartments[departmentIndex].subManagers[managerIndex].manager, 'Success!');
       localStorage.setItem('department', JSON.stringify(this.allDepartments));
       this.geAllDepartments();
     } else {
       this.allDepartments[departmentIndex].testers++;
       localStorage.setItem('department', JSON.stringify(this.allDepartments));
+      this.toaserSerivce.success('Tester Added under' + this.allDepartments[departmentIndex].manager, 'Success!');
       this.geAllDepartments();
     }
     this.selectedDepartment = this.allDepartments[departmentIndex];
-  }
-
-  addNestedSubManager(i) {
-    console.log(i);
-    console.log(this.managerArray.controls[i].value);
-    this.managerArray.push(this.formBuilder.group({
-      manager: ['', [Validators.required, Validators.minLength(0)]],
-      developers: [0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]],
-      testers: [0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]]
-    }));
-    console.log(this.departmentForm.value);
-  }
-
-  addManager() {
-    this.departmentForm.addControl('manager', new FormControl('', Validators.required));
-    this.departmentForm.addControl('developers', new FormControl(0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]));
-    this.departmentForm.addControl('testers', new FormControl(0, [Validators.required, Validators.max(999), Validators.min(0), Validators.maxLength(3), Validators.minLength(0), Validators.pattern('^[0-9]+$')]));
-    console.log(this.departmentForm.value);
   }
 
   geAllDepartments() {
@@ -166,8 +151,7 @@ export class DepartmentComponent implements OnInit {
   addDepartment(department) {
     if (this.departmentService.departmentAddEndpoint) {
       this.departmentService.addDepartment(department).subscribe((res: any) => {
-        // jQuery('#modal3').modal('hide');
-        this.toaserSerivce.success('Department Added', 'Success!');
+        jQuery('#addDepartmentModal').modal('hide');
         this.allDepartments.push(res.data);
         this.resetForm();
       });
@@ -178,6 +162,8 @@ export class DepartmentComponent implements OnInit {
       this.geAllDepartments();
       console.log(this.allDepartments);
     }
+    jQuery('#addDepartmentModal').modal('hide');
+    this.toaserSerivce.success('Department Added Successfully!', 'Success!');
   }
 
   updateDepartment(department) {
@@ -220,9 +206,11 @@ export class DepartmentComponent implements OnInit {
       if (confirm('You Sure you want to delete this Department')) {
         this.allDepartments.splice(i, 1);
         localStorage.setItem('department', JSON.stringify(this.allDepartments));
+        this.toaserSerivce.warning('Department Deleted!', 'Deleted!');
       }
     }
   }
+
   resetForm() {
     this.editing = false;
     this.submitted = false;
@@ -230,41 +218,57 @@ export class DepartmentComponent implements OnInit {
     this.departmentForm.reset();
     this.initForm();
   }
+  resetManagerForm() {
+    this.editing = false;
+    this.submitted = false;
+    this.uploading = false;
+    this.newManagerForm.reset();
+    this.initNewManagerForm();
+  }
 
   calculateDevelopers(i) {
-    let developers = this.allDepartments[i].developers;
-    if (i >= 0) {
-      if (this.allDepartments[i].subManagers.length <= 1) {
-        var sum = this.allDepartments[i].subManagers.reduce(function (sum: number, elem) {
-          console.log(developers);
-          // sum + elem.developers;
-          return developers = Number(developers) + Number(sum);
-        }, 0);
+    if (typeof i === 'number') {
+      let developers = this.allDepartments[i].developers;
+      if (this.allDepartments[i].subManagers) {
+        if (this.allDepartments[i].subManagers.length <= 1) {
+          var sum = this.allDepartments[i].subManagers.reduce(function (sum: number, elem) {
+            // sum + elem.developers;
+            return developers = Number(developers) + Number(sum);
+          }, 0);
+        } else {
+          console.log(this.allDepartments[i].subManagers);
+          var sum = this.allDepartments[i].subManagers.reduce((a, b) => +a + +(b['developers']), 0);
+          developers = Number(sum) + Number(developers);
+          return developers
+        }
       } else {
-        var sum = this.allDepartments[i].subManagers.reduce((a, b) => +a + +(b['developers']), 0);
-        developers = Number(sum) + Number(developers);
-        return developers
+        return developers;
       }
     }
   }
 
   calculateTesters(i) {
-    if (i >= 0) {
+    if (typeof i === 'number') {
       let testers = this.allDepartments[i].testers;
-      if (this.allDepartments[i].subManagers.length <= 1) {
-        var sum = this.allDepartments[i].subManagers.reduce(function (sum: number, elem) {
-          return sum + elem.testers;
-        }, 0);
-        return testers = Number(testers) + Number(sum);
-      } else {
-        var sum = this.allDepartments[i].subManagers.reduce((a, b) => +a + +(b['testers']), 0);
-        return testers = + testers + +sum;
-      }
+      if (this.allDepartments[i].subManagers) {
+        if (this.allDepartments[i].subManagers.length <= 1) {
+          var sum = this.allDepartments[i].subManagers.reduce(function (sum: number, elem) {
+            return sum + elem.testers;
+          }, 0);
+          return testers = Number(testers) + Number(sum);
+        } else {
+          var sum = this.allDepartments[i].subManagers.reduce((a, b) => +a + +(b['testers']), 0);
+          return testers = + testers + +sum;
+        }
+      } else return testers;
     }
   }
 
   calculateManagers(i) {
-    const count2 = this.allDepartments[i].subManagers.filter((manager) => manager).length + 1;
+    let count2 = 1;
+    if (this.allDepartments[i].subManagers) {
+      count2 = this.allDepartments[i].subManagers.filter((manager) => manager).length + 1;
+    }
     return count2;
   }
 
@@ -279,4 +283,41 @@ export class DepartmentComponent implements OnInit {
     this.totalArray.splice(i, 1, obj);
     this.ref.detectChanges();
   }
+
+  getManager(i) {
+    console.log(typeof i)
+    if (typeof i === 'number') {
+      console.log(this.allDepartments[this.selectedDepartmentIndex].subManagers[i]);
+      this.newManagerIndex = i;
+    } else {
+      this.newManagerIndex = undefined;
+    }
+  }
+
+  saveSubmanager() {
+    if (typeof this.newManagerIndex === 'number') {
+      console.log(this.newManagerIndex);
+      this.allDepartments[this.selectedDepartmentIndex].subManagers[this.newManagerIndex].subManagers = [];
+      this.allDepartments[this.selectedDepartmentIndex].subManagers[this.newManagerIndex].subManagers.push(this.newManagerForm.value)
+      this.toaserSerivce.success('Department Added Successfully under ' + this.allDepartments[this.selectedDepartmentIndex].subManagers[this.newManagerIndex].manager, 'Success!');
+    } else {
+      if (this.allDepartments[this.selectedDepartmentIndex].subManagers && this.allDepartments[this.selectedDepartmentIndex].subManagers.length > 0) {
+        this.allDepartments[this.selectedDepartmentIndex].subManagers.push(this.newManagerForm.value);
+        this.toaserSerivce.success('Department Added Successfully under ' + this.allDepartments[this.selectedDepartmentIndex].manager, 'Success!');
+      } else {
+        console.log(this.newManagerIndex);
+        this.allDepartments[this.selectedDepartmentIndex].subManagers = [];
+        this.allDepartments[this.selectedDepartmentIndex].subManagers.push(this.newManagerForm.value);
+        this.toaserSerivce.success('Manager Added Successfully under ' + this.allDepartments[this.selectedDepartmentIndex].manager, 'Success!');
+      }
+    }
+    
+    jQuery('#addManagerModal').modal('hide');
+    localStorage.removeItem('department');
+    localStorage.setItem('department', JSON.stringify(this.allDepartments));
+    console.log(this.allDepartments);
+    this.resetManagerForm();
+    this.geAllDepartments();
+  }
+
 }
